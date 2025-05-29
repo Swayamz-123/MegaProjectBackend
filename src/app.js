@@ -1,7 +1,7 @@
 import express from "express"
 import cors from 'cors'
 import cookieParser from "cookie-parser"
-const app = express()
+const app = express()    // ek app banate hai express ke through
 
 app.use(cors({
     origin:process.env.CORS_ORIGIN,
