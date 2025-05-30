@@ -27,4 +27,11 @@ app.use(express.static("public"))
 app.use(cookieParser())
 
 // Export the configured Express app
+//import routes
+import userRouter from './routes/user.routes.js'
+
+//routes declaration 
+// app.use('/users' ,userRouter)   //router ka naam plus kisko activate karana hai   // ab https://localhost:8000/users/login likhte hi control user router ko milega aur wo fir register ko de dega
+
+app.use("/api/v1/users",userRouter)   //good practice  https://localhost:8000/api/v1/users/register
 export {app}

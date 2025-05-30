@@ -1,10 +1,9 @@
 // Import Promise from mongoose (though this seems unnecessary)
-import { Promise } from "mongoose"
 
 // Higher-order function to wrap async route handlers and catch errors
 const asyncHandler = (requestHandler)=>{     
     // Return middleware function that handles async operations
-    (req,res,next)=>{
+   return (req,res,next)=>{
         // Resolve the async request handler and catch any errors
         Promise.resolve(requestHandler(req,res,next)).catch((err)=> next(err))
     }

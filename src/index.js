@@ -1,6 +1,7 @@
 // Import dotenv for environment variable management
 // require('dotenv') .config({path : './env'})  //more improved   ek taraf require aur ek taraf import code ki consistency ko kharab karta hai
 import dotenv from "dotenv"   //alternate import then config
+import { app } from "./app.js";
 
 // Import database connection function
 import connectDB from "./db/index.js";
