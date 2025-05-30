@@ -69,7 +69,7 @@ const userSchema = new Schema(
           required:[true,'password is required'] // Field is mandatory with custom error message
         },
         // Refresh token field for JWT authentication
-        refreshTokens:{
+        refreshToken:{
        type:String // Data type is String
         },
        
@@ -85,7 +85,7 @@ userSchema.pre("save",async function(next){
     // Only hash password if it has been modified
     if(!this.isModified("password"))  return next();
      // Hash the password with 10 salt rounds
-     this.password = bcrypt.hash(this.password,10)   //no of hash round
+     this.password = await bcrypt.hash(this.password,10)   //no of hash round
      // Call next to continue with save operation
      next()
 })    //do not use arrown fn because no reference of this   next for middleware
