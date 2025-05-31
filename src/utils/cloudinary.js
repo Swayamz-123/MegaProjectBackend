@@ -3,9 +3,6 @@ import {v2 as cloudinary} from "cloudinary"
 // Import file system module for file operations
 import fs from "fs"
 
-// Duplicate import (seems to be an error in original code)
-import { v2 as cloudinary } from 'cloudinary';
-
 
 
     // Configuration
@@ -32,8 +29,11 @@ import { v2 as cloudinary } from 'cloudinary';
             })
             //file has been uploaded succesfully
             // Log successful upload with file URL
-            console.log("File is uploaded on cloudinary",response.url);
+            // console.log("File is uploaded on cloudinary",response.url);
+            fs.unlinkSync(localFilePath)
             // Return the complete upload response
+            // console.log(response);
+            
             return response
             
         } catch (error) {
