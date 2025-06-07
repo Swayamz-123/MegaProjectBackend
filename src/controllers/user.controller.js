@@ -228,7 +228,7 @@ const updateAccountDetails = asyncHandler(async(req,res)=>{
   if(!fullName || !email){
     throw new ApiError(400,"all field are required")
   }
-  const user=User.findByIdAndUpdate(
+  const user=await User.findByIdAndUpdate(
     req.user?._id,
   {
     $set:{
@@ -241,6 +241,8 @@ const updateAccountDetails = asyncHandler(async(req,res)=>{
   .status(200)
   .json(new ApiResponse(200,user,"Account details updated successfully"))
 })
+
+//todo: delete old image = assignment
 
 const updateUserAvatar= asyncHandler(async(req,res)=>{
   const avatarLocalPath= req.file?.path
@@ -287,6 +289,72 @@ const updateUserCoverImage= asyncHandler(async(req,res)=>{
  ).select("-password")
  res.status(200).json(new ApiResponse(200,user,"coverImage updated succesfully"))
 })
+//getCurrentUserschannelProfile
+const getCurrentUserChannelProfile= asyncHandler(async(req,res)=>{
+  const {username}=req.params
+  if(!username?.trim()){
+    throw new ApiError(400,)
+  }
+  const channel=await User.aggregate([
+    {
+      $match:{
+        username : username?.toLowerCase()
+      }
+    },
+    {
+      $lookup:{
+        from:"subscriptions",
+        localField:"_id",
+        foreignField:"channel",
+        as:"subscribers"
+      }
+    },
+    {
+      $lookup:{
+        from:"subscriptions",
+        localField:"_id",
+        foreignField:"subscriber",
+        as:"subscribedTo"
+      }
+    },
+    {
+      $addFields:{
+        subscribersCount:{
+          $size: "$subscribers"
+        } ,
+        channelsSubscribedToCount : {
+          $size: " $subscribedTo"
+        },
+        isSubscibed:{
+          $cond:{
+            if:{$in : [req.user?._id, "$subscribers.subscriber"]},
+            then : true,
+            else:false
+          }
+        }
+      }
+    },
+    {
+      $project:{
+        fullName:1,
+        username : 1,
+        subscribersCount:1,
+        channelsSubscribedToCount:1,
+        isSubscibed:1,
+        avatar:1,
+        coverImage : 1,
+        email: 1
+      }
+    }
+  ])  // match kisi particular ko lega aur match karega
+  if(!channel?.length){
+    return new ApiError(404,"channel doesnt exist")
+  }
+
+  return res
+  .status(200)
+  .json(new ApiResponse(200,channel[0],"user channel fetched successfully"))
+})
 export { registerUser,
     loginUser,
     logoutUser,
@@ -295,5 +363,6 @@ export { registerUser,
     ,getCurrentUser
     ,updateAccountDetails,
     updateUserAvatar,
-    updateUserCoverImage
+    updateUserCoverImage,
+    getCurrentUserChannelProfile
 };
