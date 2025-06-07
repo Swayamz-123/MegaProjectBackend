@@ -18,14 +18,7 @@ const userSchema = new Schema(
             index:true,   // for searcching in optimised away
         },
         // Duplicate username field (this appears to be an error in original code)
-        username:{
-            type:String, // Data type is String
-            required: true, // Field is mandatory
-            unique:true, // Must be unique across all users
-            lowercase:true, // Convert to lowercase before saving
-            trim:true, // Remove whitespace from beginning and end
-            
-        },
+        
         // Email field with validation settings
         email:{
             type:String, // Data type is String
@@ -92,8 +85,7 @@ userSchema.pre("save",async function(next){
 
 // Custom method to verify if provided password matches stored hash
 //custom hooks
-userSchema.methods.isPasswordCorrect = async function
-(password){
+userSchema.methods.isPasswordmyCorrect = async function(password){
   // Compare provided password with stored hash and return boolean result
   return  await bcrypt.compare(password,this.password)     //return true or false 
 }
@@ -105,7 +97,7 @@ userSchema.methods.generateAccessToken = function(){   // yaha time nhi lagta ha
         _id:this._id, // User ID
         email : this.email, // User email
         username: this.username, // Username
-        fullName:this.fullname, // Full name
+        fullName:this.fullName, // Full name
     },
 // Use access token secret from environment variables
 process.env.ACCESS_TOKEN_SECRET,
