@@ -4,6 +4,7 @@ import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken"
+import mongoose from "mongoose";
 
 const generateAccessandRefreshTokens  = async(userId)=>{
   try {
@@ -355,6 +356,15 @@ const getCurrentUserChannelProfile= asyncHandler(async(req,res)=>{
   .status(200)
   .json(new ApiResponse(200,channel[0],"user channel fetched successfully"))
 })
+const getWatchHistory = asyncHandler(async(req,res)=>{
+ const user = await  User.aggregate([
+  {
+    $match:{
+      _id:new mongoose.Types.ObjectId(req.user._id)  //direct req.user._id  nhi use kar sakte kyunki waha se string return hota  hai jisko mongoose automatic karta hai convert
+    }
+  }
+ ])
+})
 export { registerUser,
     loginUser,
     logoutUser,
@@ -364,5 +374,7 @@ export { registerUser,
     ,updateAccountDetails,
     updateUserAvatar,
     updateUserCoverImage,
-    getCurrentUserChannelProfile
+    getCurrentUserChannelProfile,
+    getWatchHistory
+    
 };
