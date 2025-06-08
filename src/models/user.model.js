@@ -85,7 +85,8 @@ userSchema.pre("save",async function(next){
 
 // Custom method to verify if provided password matches stored hash
 //custom hooks
-userSchema.methods.isPasswordmyCorrect = async function(password){
+
+userSchema.methods.isPasswordCorrect = async function(password){
   // Compare provided password with stored hash and return boolean result
   return  await bcrypt.compare(password,this.password)     //return true or false 
 }
