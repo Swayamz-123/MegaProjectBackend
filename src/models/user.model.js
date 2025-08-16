@@ -3,8 +3,7 @@ import mongoose,{Schema} from "mongoose";
 // Import JWT library for token generation
 import jwt from "jsonwebtoken"
 // Import bcrypt library for password hashing
-import bcrypt from "bcrypt"
-
+import bcrypt from "bcrypt"  
 // Define user schema with all required fields and configurations
 const userSchema = new Schema(
     {

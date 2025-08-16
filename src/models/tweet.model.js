@@ -1,4 +1,5 @@
-import mongoose, {Schema} from "mongoose";
+import mongoose, { Schema } from "mongoose";
+import mongoosePaginate from "mongoose-paginate-v2";
 
 const tweetSchema = new Schema({
     content: {
@@ -9,7 +10,9 @@ const tweetSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: "User"
     }
-}, {timestamps: true})
+}, { timestamps: true });
 
+// Add pagination plugin to schema
+tweetSchema.plugin(mongoosePaginate);
 
-export const Tweet = mongoose.model("Tweet", tweetSchema)
+export const Tweet = mongoose.model("Tweet", tweetSchema);
