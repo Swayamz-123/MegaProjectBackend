@@ -1,10 +1,7 @@
 import mongoose from "mongoose";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from '../utils/ApiResponse.js'
-import { Like } from "../models/like.model.js";
-import { Tweet } from "../models/tweet.model.js";
 import { Video } from "../models/video.model.js";
-import { Comment } from "../models/comment.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 const uploadVideo=asyncHandler(async(req,res)=>{
@@ -357,7 +354,7 @@ const getUserVideos = asyncHandler(async (req, res) => {
 });
 
 export {
-    updateVideo,
+    uploadVideo,
     deleteVideo,
     updateVideo,
     getAllVideos,

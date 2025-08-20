@@ -30,11 +30,11 @@ app.use(cookieParser())
 //import routes
 import userRouter from './routes/user.routes.js'
 import tweetRouter from './routes/tweetRoutes.js'
-
+import videoRouter from './routes/videoRoutes.js'
 //routes declaration  
 // app.use('/users' ,userRouter)   //router ka naam plus kisko activate karana hai     // ab https://localhost:8000/users/login likhte hi control user router ko milega aur wo fir register ko de dega
  
 app.use("/api/v1/users",userRouter)   //good practice  https://localhost:8000/api/v1/users/register
-
-app.use("/api/v1/tweets",tweetRouter) 
+app.use("/api/v1/videos",videoRouter)
+app.use("/api/v1/tweets",tweetRouter)
 export {app}
