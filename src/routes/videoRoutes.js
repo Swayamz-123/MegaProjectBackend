@@ -23,9 +23,9 @@ router.route('/uploadVideo')
   );
 
 router.route('/deleteVideo/:videoId').delete(verifyJWT,deleteVideo)
-router.route('/updateVideo').patch(verifyJWT,updateVideo)
+router.route('/updateVideo/:videoId').patch(verifyJWT,updateVideo)
 router.route('/getAllVideos').get(getAllVideos)
 router.route('/getVideosById/:videoId').get(getVideoById)
-router.route('/getUserVideos').get(verifyJWT,getUserVideos)
-router.route('/togglePublishStatus').patch(verifyJWT,togglePublishStatus)
+router.route('/getUserVideos/:userId').get(verifyJWT,getUserVideos)
+router.route('/togglePublishStatus/:videoId').patch(verifyJWT,togglePublishStatus)
 
