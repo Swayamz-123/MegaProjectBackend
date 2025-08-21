@@ -4,6 +4,7 @@ import { ApiResponse } from '../utils/ApiResponse.js'
 import { Video } from "../models/video.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { deleteFromCloudinary } from "../utils/cloudinary.js";
 const uploadVideo=asyncHandler(async(req,res)=>{
   const {title,description}=req.body
   if(!title.trim()||!description.trim()){
@@ -26,12 +27,18 @@ const uploadVideo=asyncHandler(async(req,res)=>{
         throw new ApiError(400,"Thumbnail File Upload failed")
     } 
     const video = await Video.create({
-        videoFile: videoFile.url,
-        thumbnail: thumbnail.url,
-        title: title.trim(),
-        description: description.trim(),
-        duration: videoFile.duration || 0, // Cloudinary provides duration
-        owner: req.user._id
+        videoFile: {
+            url: videoFile.url,
+            publicId: videoFile.public_id
+        },
+        thumbnail: {
+            url: thumbnail.url,
+            publicId: thumbnail.public_id
+        },
+        title: title,
+        description: description,
+        duration: videoFile.duration  || "",
+        owner: req.user._id, // 
     });
     if(!video){
         throw new ApiError(500, "Something went wrong while uploading video")
@@ -230,8 +237,6 @@ const updateVideo = asyncHandler(async (req, res) => {
         new ApiResponse(200, updatedVideo, "Video updated successfully")
     );
 });
-
-// Delete video
 const deleteVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params;
 
@@ -251,8 +256,12 @@ const deleteVideo = asyncHandler(async (req, res) => {
     }
 
     // Delete files from cloudinary
-    await deleteFromCloudinary(video.videoFile);
-    await deleteFromCloudinary(video.thumbnail);
+    if (video.videoFile && video.videoFile.publicId) {
+        await deleteFromCloudinary(video.videoFile.publicId);
+    }
+    if (video.thumbnail && video.thumbnail.publicId) {
+        await deleteFromCloudinary(video.thumbnail.publicId);
+    }
 
     // Delete video from database
     await Video.findByIdAndDelete(videoId);
@@ -261,7 +270,6 @@ const deleteVideo = asyncHandler(async (req, res) => {
         new ApiResponse(200, {}, "Video deleted successfully")
     );
 });
-
 // Toggle video publish status
 const togglePublishStatus = asyncHandler(async (req, res) => {
     const { videoId } = req.params;

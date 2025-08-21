@@ -8,14 +8,20 @@ const videoSchema = new Schema(
     {
        // Video file URL field (stored as Cloudinary URL)
        videoFile:{
-        type:String, // cloudnary url
-        required : true, // Field is mandatory
-       },
-       // Thumbnail image URL field
-       thumbnail :{
-           type:String, // Data type is String
-           required:true, // Field is mandatory
-       },
+            type: {
+                url: String, // Cloudinary URL
+                publicId: String, // Public ID for deletion
+            },
+            required : true, // Field is mandatory
+        },
+        // Thumbnail image object containing URL and public_id
+        thumbnail :{
+            type: {
+                url: String, // Cloudinary URL
+                publicId: String, // Public ID for deletion
+            },
+            required:true, // Field is mandatory
+        },
        // Video title field
        title :{
            type:String, // Data type is String

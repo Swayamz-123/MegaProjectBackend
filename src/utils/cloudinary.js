@@ -5,6 +5,8 @@ import fs from "fs"
 
 
 
+
+
     // Configuration
     // Configure Cloudinary with environment variables
     cloudinary.config({ 
@@ -43,6 +45,27 @@ import fs from "fs"
             return null;
         }
     }
+    // First, configure Cloudinary with your cloud name, API key, and API secret.
+// This is typically done in a separate configuration file.
+
+
+
+
+
+// Assuming you have the public_id of the image you want to delete
+
+// Call the destroy method
+  const deleteFromCloudinary = async (publicId) => {
+  try {
+    const result = await cloudinary.uploader.destroy(publicId, { 
+      resource_type: 'video' 
+    });
+    return result;
+  } catch (error) {
+    console.error('Cloudinary deletion failed:', error);
+    throw new Error('Failed to delete video from Cloudinary.');
+  }
+};
 
     // Export the upload function
-    export {uploadOnCloudinary}
+    export {uploadOnCloudinary,deleteFromCloudinary}
