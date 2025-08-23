@@ -18,7 +18,7 @@ const toggleLike = asyncHandler(async(req,res)=>{
     }
     const existingLiked= await Like.findOne({
         video:videoId,
-        likedBy:req.User._id
+        likedBy:req.user._id
     });
     let isLiked;
     if(existingLiked){
@@ -55,7 +55,7 @@ const toggleCommentLikes=asyncHandler(async (req,res)=>{
     if(!comment){
         throw new ApiError(400,"Comment not found");
     }
-       const existingLike=await Comment.findOne({
+       const existingLike=await Like.findOne({
         comment:commentId,
         likedBy:req.user._id
        })
@@ -77,7 +77,7 @@ const toggleCommentLikes=asyncHandler(async (req,res)=>{
             isLiked,
             likeCount
         },
-        `Video ${isLiked?'Liked':`unliked`} Successfully`
+        `Comment ${isLiked?'Liked':`unliked`} Successfully`
        ))
     })
     const toggleLikeonTweet=asyncHandler(async (req,res)=>{

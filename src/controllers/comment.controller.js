@@ -82,7 +82,7 @@ const updatedComment= await Comment.findByIdAndUpdate(commentId,
     {content:content.trim()},
 {new:true}).populate("owner","userName fullName avatar")
 
-return res.status(200).json(new ApiResponse(201,updateComment,"comment updated successfully"))
+return res.status(200).json(new ApiResponse(201,updatedComment,"comment updated successfully"))
 })
 const deleteComment = asyncHandler(async (req,res)=>{
     const {commentId}=req.params;
