@@ -27,3 +27,4 @@ router.route().get(verifyJWT,getPlaylistById)
 router.route().get(verifyJWT,getPlaylistsByVideo)
 router.route().get(verifyJWT,reorderPlaylistVideos)
 router.route().get(verifyJWT,getPublicPlaylists)
+export default router

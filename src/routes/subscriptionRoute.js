@@ -8,7 +8,7 @@ subscribeChannel,
   getSubscriberCount,
   getSubscriptionStatus,
 } from '../controllers/subscription.controller.js'
-import { Router } from "express";
+
 const router = Router()
 router.route('/subscribeChannel/:channelId').post(verifyJWT,subscribeChannel)
 router.route('/unsubscribeChannel/:channelId').post(verifyJWT,unsubscribeChannel)

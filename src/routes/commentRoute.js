@@ -1,4 +1,4 @@
-import { verifyJWT } from "../middlewares/auth.middleware";
+import { verifyJWT } from "../middlewares/auth.middleware.js";
 import {
      checkCommentOwnership,
     getCommentCount,
@@ -21,3 +21,4 @@ router.route('/updatecomment/:commentId').post(verifyJWT,updateComment)
 router.route('/deletecomment/:commentId').post(verifyJWT,deleteComment)
 router.route('/addcomment/:videoId').post(verifyJWT,addComment)
 router.route('/getlatestcomment/:videoId').post(getLatestComment)
+export default router

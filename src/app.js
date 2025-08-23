@@ -31,10 +31,21 @@ app.use(cookieParser())
 import userRouter from './routes/user.routes.js'
 import tweetRouter from './routes/tweetRoutes.js'
 import videoRouter from './routes/videoRoutes.js'
+import likeRouter from './routes/likeRoute.js'
+import dashboardRouter from './routes/dashboardRoute.js'
+import subscriptionRouter from './routes/subscriptionRoute.js'
+import playlistRouter from './routes/playlistRoutes.js'
+import commentRouter from './routes/commentRoute.js'
 //routes declaration  
 // app.use('/users' ,userRouter)   //router ka naam plus kisko activate karana hai     // ab https://localhost:8000/users/login likhte hi control user router ko milega aur wo fir register ko de dega
  
 app.use("/api/v1/users",userRouter)   //good practice  https://localhost:8000/api/v1/users/register
 app.use("/api/v1/videos",videoRouter)
 app.use("/api/v1/tweets",tweetRouter)
+app.use("/api/v1/likes",likeRouter)
+app.use("/api/v1/comments",commentRouter)
+app.use("/api/v1/subscription",subscriptionRouter)
+app.use("/api/v1/playlist",playlistRouter)
+app.use("/api/v1/dashboard",dashboardRouter)
+
 export {app}
