@@ -13,12 +13,12 @@ import {
 import { Router } from "express";
 const router = Router()
 router.use(verifyJWT)
-router.route('/commentowner/:commentId').post(verifyJWT,checkCommentOwnership)
-router.route('/commentcount/:videoId').post(getCommentCount)
-router.route('/getvideocomments/:videoId').post(getVideoComments)
-router.route('/getusercomments').post(verifyJWT,getUserComments)
-router.route('/updatecomment/:commentId').post(verifyJWT,updateComment)
-router.route('/deletecomment/:commentId').post(verifyJWT,deleteComment)
-router.route('/addcomment/:videoId').post(verifyJWT,addComment)
-router.route('/getlatestcomment/:videoId').post(getLatestComment)
+router.route('/commentowner/:commentId').get(verifyJWT,checkCommentOwnership) //working
+router.route('/commentcount/:videoId').get(getCommentCount) //working
+router.route('/getvideocomments/:videoId').get(getVideoComments) //working
+router.route('/getusercomments').get(verifyJWT,getUserComments)  //working
+router.route('/updatecomment/:commentId').post(verifyJWT,updateComment)  //working
+router.route('/deletecomment/:commentId').delete(verifyJWT,deleteComment) //working
+router.route('/addcomment/:videoId').post(verifyJWT,addComment) //working
+router.route('/getlatestcomment/:videoId').get(getLatestComment)  //working
 export default router

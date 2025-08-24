@@ -49,7 +49,7 @@ const addComment = asyncHandler(async (req,res)=>{
     // Fetch the most recent comment
     const latestComment = await Comment.findOne({ video: videoId })
         .sort({ createdAt: -1 }) // Latest first
-        .populate("commentedBy", "username avatar");
+        .populate("owner", "username avatar");
 
     if (!latestComment) {
         throw new ApiError(404, "No comments found for this video");
@@ -74,7 +74,7 @@ const comment=await Comment.findById(commentId)
 if(!comment){
     throw new ApiError(400,"Comment not found")
 }
-const isCommentOwned=comment.owner.toString()===req.user._id
+const isCommentOwned=comment.owner.toString()===req.user._id.toString()
 if(!isCommentOwned){
     throw new ApiError(400,"You can only update your own comment")
 }
@@ -156,7 +156,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
 
     // Add like information if requested
     if (includeLikes === "true") {
-        aggregateQuery.push(
+        await aggregateQuery.append(
             {
                 $lookup: {
                     from: "likes",
@@ -186,7 +186,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
         );
     } else {
         // Just add owner field without like info
-        aggregateQuery.push({
+        aggregateQuery.append({
             $addFields: {
                 owner: {
                     $first: "$owner"
@@ -203,7 +203,8 @@ const getVideoComments = asyncHandler(async (req, res) => {
         sortStage[sortBy] = sortType === "desc" ? -1 : 1;
     }
 
-    aggregateQuery.push({ $sort: sortStage });
+    aggregateQuery.append
+    ({ $sort: sortStage });
 
     const options = {
         page: parseInt(page),
@@ -278,7 +279,7 @@ const getUserComments = asyncHandler(async (req, res) => {
 
     // Add like information if it's user's own comments
     if (isOwnComments) {
-        aggregateQuery.push({
+        aggregateQuery.append({
             $lookup: {
                 from: "likes",
                 localField: "_id",
@@ -288,7 +289,7 @@ const getUserComments = asyncHandler(async (req, res) => {
         });
     }
 
-    aggregateQuery.push(
+    aggregateQuery.append(
         {
             $addFields: {
                 video: {
@@ -306,6 +307,8 @@ const getUserComments = asyncHandler(async (req, res) => {
         },
         {
             $project: {
+
+                _id:1,
                 ...(isOwnComments && { likes: 0 })
             }
         },
@@ -333,7 +336,7 @@ const getUserComments = asyncHandler(async (req, res) => {
 });
 //get comment count
 const getCommentCount = asyncHandler(async(req,res)=>{
-    const videoId=req.params;
+    const {videoId}=req.params;
     if(!mongoose.isValidObjectId(videoId)){
         throw new ApiError(200,"Not a valid comment id")
     }
@@ -359,7 +362,7 @@ const checkCommentOwnership = asyncHandler(async (req, res) => {
     const isOwner = comment.owner.toString() === req.user._id.toString();
 
     return res.status(200).json(
-        new ApiResponse(200, { isOwner }, "Comment ownership checked")
+        new ApiResponse(200, { isOwner,owner:req.user._id }, "Comment ownership checked")
     );
 });
 
