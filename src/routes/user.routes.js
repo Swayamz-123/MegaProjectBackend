@@ -34,11 +34,11 @@ router.route("/login").post(loginUser)
 router.route("/logout").post(verifyJWT,logoutUser)
 export default router
 
-router.route("/refresh-token").post(refreshAccessToken)
-router.route("/change-password").post(verifyJWT,changeCurrentPassword)
-router.route("/current-user").get(verifyJWT,getCurrentUser)
-router.route("/update-account").patch(verifyJWT,updateAccountDetails)   //patch to update single detail
-router.route("/avatar").patch(verifyJWT,upload.single("avatar"),updateUserAvatar)
-router.route("/cover-Image").patch(verifyJWT,upload.single("coverImage"),updateUserCoverImage)
-router.route("/c/:username").get(verifyJWT,getCurrentUserChannelProfile)
-router.route("/history").get(verifyJWT,getWatchHistory)
+router.route("/refresh-token").post(refreshAccessToken)  //working
+router.route("/change-password").post(verifyJWT,changeCurrentPassword)  //working
+router.route("/current-user").get(verifyJWT,getCurrentUser)   //working
+router.route("/update-account").patch(verifyJWT,updateAccountDetails)   //patch to update single detail //working
+router.route("/avatar").patch(verifyJWT,upload.single("avatar"),updateUserAvatar) //working
+router.route("/cover-Image").patch(verifyJWT,upload.single("coverImage"),updateUserCoverImage)  //working
+router.route("/c/:username").get(verifyJWT,getCurrentUserChannelProfile)  //working
+router.route("/history").get(verifyJWT,getWatchHistory)  //working

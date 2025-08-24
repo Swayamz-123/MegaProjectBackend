@@ -14,12 +14,12 @@ const router = Router();
 
 router.use(verifyJWT);
 
-router.route('/video/:videoId').post(toggleLike);
-router.route('/tweet/:tweetId').post(toggleLikeonTweet);
-router.route('/comment/:commentId').post(toggleCommentLikes);
-router.route('/videos').get(getLikedVideos);
+router.route('/video/:videoId').post(toggleLike); //working
+router.route('/tweet/:tweetId').post(toggleLikeonTweet); //working
+router.route('/comment/:commentId').post(toggleCommentLikes); //working
+router.route('/videos').get(getLikedVideos); //working
 router.route('/status').post(getLikeStatus);
-router.route('/count/:itemType/:itemId').get(getLikesCount);
-router.route('/likers/:itemType/:itemId').get(getItemLikers);
+router.route('/count/:itemType/:itemId').get(getLikesCount); 
+router.route('/likers/:itemType/:itemId').get(getItemLikers); //comment
 
 export default router;

@@ -7,6 +7,7 @@ import { Tweet } from "../models/tweet.model.js";
 import { Video } from "../models/video.model.js";
 import { Comment } from "../models/comment.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { validateItemExists } from "../utils/validateItemExists.js";
 const toggleLike = asyncHandler(async(req,res)=>{
     const {videoId}=req.params;
     if(!mongoose.isValidObjectId(videoId)){
@@ -252,62 +253,98 @@ const getLikeStatus = asyncHandler(async (req, res) => {
         new ApiResponse(200, likeStatus, "Like status fetched successfully")
     );
 });
-
-// Get likes count for an item
 const getLikesCount = asyncHandler(async (req, res) => {
     const { itemId, itemType } = req.params;
     
+    // Validate item type
     if (!['video', 'comment', 'tweet'].includes(itemType)) {
-        throw new ApiError(400, "Invalid item type");
+        throw new ApiError(400, "Invalid item type. Must be 'video', 'comment', or 'tweet'");
     }
     
+    // Validate item ID format
     if (!mongoose.isValidObjectId(itemId)) {
-        throw new ApiError(400, "Invalid item ID");
+        throw new ApiError(400, "Invalid item ID format");
     }
     
-    const query = {};
-    query[itemType] = itemId;
+    // VALIDATE THAT ITEM EXISTS IN THE CORRECT COLLECTION
+    await validateItemExists(itemId, itemType);
     
-    const likeCount = await Like.countDocuments(query);
+    // Count likes for this specific item
+    const likeCount = await Like.countDocuments({
+        itemId: new mongoose.Types.ObjectId(itemId),
+        itemType: itemType
+    });
     
     return res.status(200).json(
-        new ApiResponse(200, { likeCount }, "Like count fetched successfully")
+        new ApiResponse(200, { 
+            itemId,
+            itemType,
+            likeCount 
+        }, "Like count fetched successfully")
     );
 });
 
-// Get users who liked an item
 const getItemLikers = asyncHandler(async (req, res) => {
     const { itemId, itemType } = req.params;
     const { page = 1, limit = 10 } = req.query;
     
+    // Validate item type
     if (!['video', 'comment', 'tweet'].includes(itemType)) {
-        throw new ApiError(400, "Invalid item type");
+        throw new ApiError(400, "Invalid item type. Must be 'video', 'comment', or 'tweet'");
     }
     
+    // Validate item ID format
     if (!mongoose.isValidObjectId(itemId)) {
-        throw new ApiError(400, "Invalid item ID");
+        throw new ApiError(400, "Invalid item ID format");
     }
     
-    const query = {};
-    query[itemType] = itemId;
+    const pageNum = Math.max(1, parseInt(page));
+    const limitNum = Math.max(1, Math.min(100, parseInt(limit)));
     
-    const likers = await Like.find(query)
+    // VALIDATE THAT ITEM EXISTS IN THE CORRECT COLLECTION
+    const item = await validateItemExists(itemId, itemType);
+    
+    // Get likers and total count in parallel
+    const [likers, totalLikers] = await Promise.all([
+        Like.find({
+            itemId: itemId,
+            itemType: itemType
+        })
         .populate('likedBy', 'username fullName avatar')
         .sort({ createdAt: -1 })
-        .limit(limit * 1)
-        .skip((page - 1) * limit);
+        .limit(limitNum)
+        .skip((pageNum - 1) * limitNum)
+        .lean(),
+        
+        Like.countDocuments({
+            itemId: itemId,
+            itemType: itemType
+        })
+    ]);
     
-    const totalLikers = await Like.countDocuments(query);
+    // Filter out any null likedBy references
+    const validLikers = likers
+        .map(like => like.likedBy)
+        .filter(user => user !== null);
     
     return res.status(200).json(
         new ApiResponse(200, {
-            likers: likers.map(like => like.likedBy),
+            itemId,
+            itemType,
+            itemInfo: {
+                title: item.title || item.content || 'N/A', // Include item info
+            },
+            likers: validLikers,
             totalLikers,
-            page,
-            totalPages: Math.ceil(totalLikers / limit)
+            page: pageNum,
+            limit: limitNum,
+            totalPages: Math.ceil(totalLikers / limitNum),
+            hasNextPage: pageNum < Math.ceil(totalLikers / limitNum),
+            hasPrevPage: pageNum > 1
         }, "Item likers fetched successfully")
     );
 });
+
 export {
     toggleLike,
     toggleLikeonTweet,

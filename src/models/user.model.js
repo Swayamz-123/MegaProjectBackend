@@ -64,6 +64,11 @@ const userSchema = new Schema(
         refreshToken:{
        type:String // Data type is String
         },
+        role: {
+    type: String,
+    enum: ["user", "admin"],   // allowed values
+    default: "user"            // default role
+  }
        
     },
     {
@@ -125,4 +130,4 @@ expiresIn:process.env.REFRESH_TOKEN_EXPIRY
 }
 
 // Create and export User model from the schema
-export const User = mongoose.model("User",userSchema)
+export const User = mongoose.model("User",userSchema) //

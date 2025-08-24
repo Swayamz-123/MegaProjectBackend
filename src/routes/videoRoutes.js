@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { upload } from "../middlewares/multer.middleware.js";
+import { upload} from "../middlewares/multer.middleware.js";
 import {
     uploadVideo,
     deleteVideo,
@@ -22,10 +22,10 @@ router.route('/uploadVideo')
     uploadVideo
   );
 
-router.route('/deleteVideo/:videoId').delete(verifyJWT,deleteVideo)
-router.route('/updateVideo/:videoId').patch(verifyJWT,updateVideo)
-router.route('/getAllVideos').get(getAllVideos)
-router.route('/getVideosById/:videoId').get(getVideoById)
-router.route('/getUserVideos/:userId').get(verifyJWT,getUserVideos)
-router.route('/togglePublishStatus/:videoId').patch(verifyJWT,togglePublishStatus)
+router.route('/deleteVideo/:videoId').delete(verifyJWT,deleteVideo)  //working
+router.route('/updateVideo/:videoId').patch(verifyJWT,updateVideo)   //working
+router.route('/getAllVideos').get(getAllVideos)  //working
+router.route('/getVideosById/:videoId').get(getVideoById)  //working
+router.route('/getUserVideos/:userId').get(verifyJWT,getUserVideos)  //working
+router.route('/togglePublishStatus/:videoId').patch(verifyJWT,togglePublishStatus)  //working
 
