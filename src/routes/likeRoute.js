@@ -18,8 +18,8 @@ router.route('/video/:videoId').post(toggleLike); //working
 router.route('/tweet/:tweetId').post(toggleLikeonTweet); //working
 router.route('/comment/:commentId').post(toggleCommentLikes); //working
 router.route('/videos').get(getLikedVideos); //working
-router.route('/status').post(getLikeStatus);
-router.route('/count/:itemType/:itemId').get(getLikesCount); 
-router.route('/likers/:itemType/:itemId').get(getItemLikers); //comment
+router.route('/status').get(getLikeStatus);  //working
+router.route('/count/:itemType/:itemId').get(getLikesCount);  //working
+router.route('/likers/:itemType/:itemId').get(getItemLikers); //working
 
 export default router;

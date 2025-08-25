@@ -199,82 +199,64 @@ const getLikedVideos = asyncHandler(async (req, res) => {
 });
 
 // Get like status for multiple items
+
+
 const getLikeStatus = asyncHandler(async (req, res) => {
-    const { videoIds, commentIds, tweetIds } = req.body;
-    
+    let { videoId, commentId, tweetId } = req.query;  // ✅ safer than params
+
     const likeStatus = {};
-    
-    // Check video likes
-    if (videoIds && Array.isArray(videoIds)) {
-        const videoLikes = await Like.find({
-            video: { $in: videoIds },
+
+    // Video Like
+    if (videoId) {
+        const liked = await Like.exists({
+            video: new mongoose.Types.ObjectId(videoId),   // ✅ ensure ObjectId
             likedBy: req.user._id
-        }).select('video');
-        
-        likeStatus.videos = {};
-        videoIds.forEach(id => {
-            likeStatus.videos[id] = videoLikes.some(like => 
-                like.video.toString() === id.toString()
-            );
         });
+        likeStatus.video = !!liked;
     }
-    
-    // Check comment likes
-    if (commentIds && Array.isArray(commentIds)) {
-        const commentLikes = await Like.find({
-            comment: { $in: commentIds },
+
+    // Comment Like
+    if (commentId) {
+        const liked = await Like.exists({
+            comment: new mongoose.Types.ObjectId(commentId),
             likedBy: req.user._id
-        }).select('comment');
-        
-        likeStatus.comments = {};
-        commentIds.forEach(id => {
-            likeStatus.comments[id] = commentLikes.some(like => 
-                like.comment.toString() === id.toString()
-            );
         });
+        likeStatus.comment = !!liked;
     }
-    
-    // Check tweet likes
-    if (tweetIds && Array.isArray(tweetIds)) {
-        const tweetLikes = await Like.find({
-            tweet: { $in: tweetIds },
+
+    // Tweet Like
+    if (tweetId) {
+        const liked = await Like.exists({
+            tweet: new mongoose.Types.ObjectId(tweetId),
             likedBy: req.user._id
-        }).select('tweet');
-        
-        likeStatus.tweets = {};
-        tweetIds.forEach(id => {
-            likeStatus.tweets[id] = tweetLikes.some(like => 
-                like.tweet.toString() === id.toString()
-            );
         });
+        likeStatus.tweet = !!liked;
     }
 
     return res.status(200).json(
         new ApiResponse(200, likeStatus, "Like status fetched successfully")
     );
 });
+
+
 const getLikesCount = asyncHandler(async (req, res) => {
-    const { itemId, itemType } = req.params;
-    
-    // Validate item type
+    const { itemType, itemId } = req.params;
+
     if (!['video', 'comment', 'tweet'].includes(itemType)) {
         throw new ApiError(400, "Invalid item type. Must be 'video', 'comment', or 'tweet'");
     }
-    
-    // Validate item ID format
+
     if (!mongoose.isValidObjectId(itemId)) {
         throw new ApiError(400, "Invalid item ID format");
     }
-    
-    // VALIDATE THAT ITEM EXISTS IN THE CORRECT COLLECTION
-    await validateItemExists(itemId, itemType);
-    
-    // Count likes for this specific item
-    const likeCount = await Like.countDocuments({
-        itemId: new mongoose.Types.ObjectId(itemId),
-        itemType: itemType
-    });
-    
+
+    // Dynamic query depending on itemType
+    const query = {
+        [itemType]: new mongoose.Types.ObjectId(itemId)
+    };
+
+    const likeCount = await Like.countDocuments(query);
+
     return res.status(200).json(
         new ApiResponse(200, { 
             itemId,
@@ -283,6 +265,7 @@ const getLikesCount = asyncHandler(async (req, res) => {
         }, "Like count fetched successfully")
     );
 });
+
 
 const getItemLikers = asyncHandler(async (req, res) => {
     const { itemId, itemType } = req.params;
