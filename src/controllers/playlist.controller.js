@@ -7,7 +7,7 @@ import mongoose from "mongoose";
 
 // Create a new playlist
 const createPlaylist = asyncHandler(async (req, res) => {
-    const { name, description } = req.body;
+    const { name, description, isPublic = true } = req.body;
 
     // Validate required fields
     if (!name?.trim()) {
@@ -18,12 +18,23 @@ const createPlaylist = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Playlist description is required");
     }
 
+    // Check if playlist name already exists for this user
+    const existingPlaylist = await Playlist.findOne({
+        name: name.trim(),
+        owner: req.user._id
+    });
+
+    if (existingPlaylist) {
+        throw new ApiError(400, "A playlist with this name already exists");
+    }
+
     // Create playlist
     const playlist = await Playlist.create({
         name: name.trim(),
         description: description.trim(),
         owner: req.user._id,
-        videos: []
+        videos: [],
+        isPublic: Boolean(isPublic)
     });
 
     if (!playlist) {
@@ -58,8 +69,15 @@ const getPlaylistById = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Playlist not found");
     }
 
+    const isOwner = playlist.owner._id.toString() === req.user?._id?.toString();
+
+    // Check if user can access this playlist
+    if (!isOwner && !playlist.isPublic) {
+        throw new ApiError(403, "This playlist is private");
+    }
+
     // Filter out unpublished videos (unless owner is viewing)
-    if (playlist.owner._id.toString() !== req.user?._id?.toString()) {
+    if (!isOwner) {
         playlist.videos = playlist.videos.filter(video => video.isPublished);
     }
 
@@ -77,7 +95,15 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Invalid user ID");
     }
 
-    const playlists = await Playlist.find({ owner: userId })
+    const isOwnProfile = userId === req.user?._id?.toString();
+    
+    // If viewing someone else's profile, only show public playlists
+    const filter = { owner: userId };
+    if (!isOwnProfile) {
+        filter.isPublic = true;
+    }
+
+    const playlists = await Playlist.find(filter)
         .populate("owner", "username fullName avatar")
         .sort({ updatedAt: -1 })
         .limit(parseInt(limit))
@@ -130,7 +156,7 @@ const getMyPlaylists = asyncHandler(async (req, res) => {
 // Update playlist details
 const updatePlaylist = asyncHandler(async (req, res) => {
     const { playlistId } = req.params;
-    const { name, description } = req.body;
+    const { name, description, isPublic } = req.body;
 
     if (!mongoose.isValidObjectId(playlistId)) {
         throw new ApiError(400, "Invalid playlist ID");
@@ -147,14 +173,54 @@ const updatePlaylist = asyncHandler(async (req, res) => {
         throw new ApiError(403, "You can only update your own playlists");
     }
 
+    // Check for duplicate name if updating name
+    if (name?.trim() && name.trim() !== playlist.name) {
+        const existingPlaylist = await Playlist.findOne({
+            name: name.trim(),
+            owner: req.user._id,
+            _id: { $ne: playlistId }
+        });
+
+        if (existingPlaylist) {
+            throw new ApiError(400, "A playlist with this name already exists");
+        }
+    }
+
     // Update fields
     if (name?.trim()) playlist.name = name.trim();
     if (description?.trim()) playlist.description = description.trim();
+    if (typeof isPublic === 'boolean') playlist.isPublic = isPublic;
 
     await playlist.save();
 
     return res.status(200).json(
         new ApiResponse(200, playlist, "Playlist updated successfully")
+    );
+});
+
+// Toggle playlist privacy
+const togglePlaylistPrivacy = asyncHandler(async (req, res) => {
+    const { playlistId } = req.params;
+
+    if (!mongoose.isValidObjectId(playlistId)) {
+        throw new ApiError(400, "Invalid playlist ID");
+    }
+    
+    const playlist = await Playlist.findById(playlistId);
+    
+    if (!playlist) {
+        throw new ApiError(404, "Playlist not found");
+    }
+
+    if (playlist.owner.toString() !== req.user._id.toString()) {
+        throw new ApiError(403, "You can only modify your own playlists");
+    }
+    
+    playlist.isPublic = !playlist.isPublic;
+    await playlist.save();
+    
+    return res.status(200).json(
+        new ApiResponse(200, playlist, `Playlist is now ${playlist.isPublic ? 'public' : 'private'}`)
     );
 });
 
@@ -270,7 +336,7 @@ const getPlaylistsByVideo = asyncHandler(async (req, res) => {
         videos: videoId,
         owner: req.user._id
     })
-    .select("name description createdAt")
+    .select("name description createdAt isPublic")
     .sort({ updatedAt: -1 });
 
     return res.status(200).json(
@@ -326,7 +392,9 @@ const reorderPlaylistVideos = asyncHandler(async (req, res) => {
 const getPublicPlaylists = asyncHandler(async (req, res) => {
     const { page = 1, limit = 12, search = "" } = req.query;
 
-    const matchStage = {};
+    const matchStage = {
+        isPublic: true // Only show public playlists
+    };
     
     // Add search functionality
     if (search.trim()) {
@@ -367,6 +435,7 @@ export {
     getUserPlaylists,
     getMyPlaylists,
     updatePlaylist,
+    togglePlaylistPrivacy,
     deletePlaylist,
     addVideoToPlaylist,
     removeVideoFromPlaylist,
